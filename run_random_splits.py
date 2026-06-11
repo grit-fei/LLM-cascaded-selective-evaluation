@@ -76,6 +76,17 @@ all_permutations = list(itertools.permutations(MODEL_NAMES))
 # ============================================================
 all_results = []  # 收集所有结果，最后排序写CSV
 
+fieldnames = [
+    "run", "permutation", "selective_acc", "coverage",
+    "evaluated_samples", "meets_target", "evaluator_composition",
+    "lambda_hats", "calibration_sample_ids", "test_sample_ids",
+]
+
+csv_file = open(OUTPUT_CSV, "w", newline="", encoding="utf-8")
+writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+writer.writeheader()
+csv_file.flush()
+
 for run_idx in range(1, NUM_RUNS + 1):
     print(f"\n[Run {run_idx}/{NUM_RUNS}]")
 
@@ -132,6 +143,9 @@ for run_idx in range(1, NUM_RUNS + 1):
                 "test_sample_ids": "|".join(test_sample_ids),
             }
             all_results.append(result_row)
+            
+            writer.writerow(result_row)
+            csv_file.flush()
 
             # 满足目标条件时在终端高亮提示
             if meets_target:
@@ -164,10 +178,7 @@ fieldnames = [
     "test_sample_ids",
 ]
 
-with open(OUTPUT_CSV, "w", newline="", encoding="utf-8") as f:
-    writer = csv.DictWriter(f, fieldnames=fieldnames)
-    writer.writeheader()
-    writer.writerows(all_results_sorted)
+csv_file.close()
 
 print(f"结果已保存到: {OUTPUT_CSV}")
 print(f"共 {len(all_results_sorted)} 条结果")
